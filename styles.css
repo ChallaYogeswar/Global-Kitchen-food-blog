@@ -1,0 +1,295 @@
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Lora', serif;
+}
+
+body {
+    background-color: #f9f1e7;
+    color: #333;
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Header & Navigation */
+header .navbar {
+    background-color: #87ceeb;
+    padding: 15px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    align-items: center;
+}
+
+.nav-links li {
+    margin-left: 20px;
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    font-family: 'Lora', serif;
+    transition: all 0.3s ease;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.nav-links a:hover, .nav-links a.active {
+    background-color: rgba(255,255,255,0.2);
+}
+
+.search-container {
+    position: relative;
+}
+
+#search-bar {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    width: 180px;
+    transition: width 0.3s ease;
+}
+
+#search-bar:focus {
+    width: 220px;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+/* Hero Section */
+.hero {
+    background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('../images/hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #fff;
+    padding: 0 20px;
+}
+
+.hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 56px;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.intro-text {
+    font-size: 24px;
+    max-width: 800px;
+    margin-bottom: 30px;
+}
+
+.cta-button {
+    background-color: #87ceeb;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 18px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Lora', serif;
+}
+
+.cta-button:hover {
+    background-color: #5fb9e1;
+    transform: scale(1.05);
+}
+
+/* Cuisine Types Section */
+.cuisine-types {
+    padding: 60px 5%;
+    text-align: center;
+}
+
+.cuisine-types h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 40px;
+    margin-bottom: 30px;
+    color: #444;
+}
+
+/* Cuisine Cards Fix */
+.cuisine-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+    gap: 30px;
+    justify-content: center;
+    padding: 20px;
+}
+
+.cuisine-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cuisine-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+.cuisine-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+
+/* Dishes Section */
+.dishes {
+    padding: 60px 5%;
+    background-color: #fff;
+    display: block !important;
+}
+
+.dishes h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 40px;
+    margin-bottom: 30px;
+    text-align: center;
+    color: #444;
+}
+
+.dish-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 20px;
+}
+
+.dish-card {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+    display: block !important;
+}
+
+.dish-card:hover {
+    transform: translateY(-10px);
+}
+
+.dish-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.dish-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    padding: 15px 15px 5px;
+}
+
+.dish-card p {
+    padding: 0 15px 15px;
+    color: #666;
+}
+
+/* Fix for Hidden Recipe Sections */
+.hidden {
+    display: none;
+}
+
+.recipe-btn {
+    background-color: #87ceeb;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    margin: 0 15px 15px;
+    transition: background-color 0.3s;
+}
+
+.recipe-btn:hover {
+    background-color: #5fb9e1;
+}
+
+.recipe-details {
+    margin: 0 15px 15px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    text-align: left;
+    display: none;
+}
+
+.recipe-details h4 {
+    margin-bottom: 10px;
+    font-family: 'Playfair Display', serif;
+}
+
+.recipe-details ol {
+    padding-left: 20px;
+}
+
+.recipe-details li {
+    margin-bottom: 5px;
+}
+
+/* Footer */
+footer {
+    background-color: #333;
+    color: #ccc;
+    padding: 40px 5% 20px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+/* Responsive Fixes */
+@media (max-width: 768px) {
+    .cuisine-grid {
+        grid-template-columns: repeat(2, minmax(250px, 1fr));
+    }
+    .dish-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .cuisine-grid {
+        grid-template-columns: 1fr;
+    }
+}

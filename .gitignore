@@ -1,0 +1,16 @@
+# Ignore VS Code settings
+.vscode/
+
+
+# Ignore workflow files (screenshots and recordings)
+Work flow/
+
+# Common ignores for web projects
+*.log
+.DS_Store
+Thumbs.db
+node_modules/
+dist/
+build/
+.env
+*.tmp

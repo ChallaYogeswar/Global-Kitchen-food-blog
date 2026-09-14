@@ -3,107 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Kitchen</title>
+    <meta name="description" content="Discover practical recipes and food stories from South India, North India, Korea, and Japan.">
+    <title>Global Kitchen | Recipes from around the world</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <header>
-        <nav class="navbar">
-            <div class="logo">Global Kitchen</div>
-            <ul class="nav-links">
-                <li><a href="#home" class="nav-link active">Home</a></li>
-                <li><a href="#cuisines" class="nav-link">Cuisines</a></li>
-                <li><a href="#about" class="nav-link">About</a></li>
-                <li><div class="search-container"><input type="text" id="search-bar" placeholder="Search recipes..."><div id="search-results"></div></div></li>
-            </ul>
-        </nav>
-    </header>
-
+<body class="home-page">
+    <header class="site-header"><nav class="navbar" aria-label="Primary navigation">
+        <a class="logo" href="index.html">Global Kitchen</a>
+        <div class="nav-actions"><a href="#cuisines">Cuisines</a><a href="#about">About</a><a class="favorites-link" href="#favorites">Saved <span id="favorite-count">0</span></a>
+            <label class="search-container" for="search-bar"><span class="sr-only">Search recipes</span><input type="search" id="search-bar" placeholder="Search recipes..." autocomplete="off"></label>
+        </div>
+    </nav></header>
     <main>
-        <section id="home" class="hero">
-            <h1>Discover World Cuisines</h1>
-            <p class="intro-text">Explore authentic recipes from around the globe</p>
-            <button class="cta-button">Start Exploring</button>
-        </section>
-
-        <section id="cuisines" class="cuisine-types">
-            <h2>Explore Cuisines</h2>
-            <div class="cuisine-grid">
-                <a href="Pages/south-indian.html" class="cuisine-card">
-                    <img src="images/cuisines/South-Indian-main.webp" alt="South Indian cuisine featuring rice and spices" loading="lazy">
-                    <h3>South Indian</h3>
-                    <p>Discover the vibrant flavors of South Indian cuisine known for its aromatic rice dishes, flavorful dosas, and spicy curries.</p>
-                </a>
-                <a href="Pages/north-indian.html" class="cuisine-card">
-                    <img src="images/cuisines/North-indian-cuisine.avif" alt="North Indian cuisine with rich curries" loading="lazy">
-                    <h3>North Indian</h3>
-                    <p>Experience the rich and creamy curries, tandoori specialties, and diverse bread varieties of North Indian cuisine.</p>
-                </a>
-                <a href="Pages/korean.html" class="cuisine-card">
-                    <img src="images/cuisines/Korean-cuisine.jpg" alt="Korean cuisine with spicy and savory dishes" loading="lazy">
-                    <h3>Korean</h3>
-                    <p>Enjoy the perfect balance of spicy, sweet, and savory flavors that make Korean cuisine a global favorite.</p>
-                </a>
-                <a href="Pages/japanese.html" class="cuisine-card">
-                    <img src="images/cuisines/japanese-Kaiseki.webp" alt="Japanese cuisine with sushi and noodles" loading="lazy">
-                    <h3>Japanese</h3>
-                    <p>Explore the elegant simplicity and refined techniques of Japanese cuisine, from sushi to ramen.</p>
-                </a>
-            </div>
-        </section>
-
-        <section id="about" class="about">
-            <h2>About Us</h2>
-            <div class="about-content">
-                <div class="about-text">
-                    <p>We are passionate food enthusiasts bringing you the best recipes from around the world. Our mission is to inspire your culinary journey with authentic flavors and stories.</p>
-                    <p>Global Kitchen was founded in 2025 by passionate food enthusiasts who aimed to promote diverse cuisines with a focus on health-conscious cooking and mindful eating.</p>
-                    <p>Each recipe on our site has been carefully tested and adapted for home cooking, ensuring you can recreate these global flavors in your own kitchen.</p>
-                </div>
-                <div class="about-image">
-                    <img src="images/about-us.jpg" alt="Our team of international chefs" loading="lazy">
-                </div>
-            </div>
-        </section>
-
-        <section id="newsletter" class="newsletter">
-            <h2>Stay Updated</h2>
-            <p>Subscribe to our newsletter for weekly recipe inspiration</p>
-            <form id="newsletter-form">
-                <input type="email" placeholder="Your email address" required>
-                <button type="submit">Subscribe</button>
-            </form>
-        </section>
-    </main>
-
-    <footer>
-        <div class="footer-content">
-            <div class="footer-about">
-                <h3>Global Kitchen</h3>
-                <p>Bringing the world's flavors to your kitchen since 2025.</p>
-            </div>
-            <div class="footer-links">
-                <h3>Quick Links</h3>
-                <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#cuisines">Cuisines</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#newsletter">Newsletter</a></li>
-                </ul>
-            </div>
-            <div class="social-links">
-                <h3>Connect With Us</h3>
-                <div class="social-icons">
-                    <a href="#" class="images/FACEBOOK.jpeg">Facebook</a>
-                    <a href="#" class="images/INSTAGRAM.jpeg">Instagram</a>
-                </div>
-            </div>
-        </div>
-        <div class="copyright">
-            <p>© 2025 Global Kitchen. All rights reserved.</p>
-        </div>
-    </footer>
-    <script src="script.js"></script>
+        <section id="home" class="hero"><div class="hero-copy"><p class="eyebrow">Recipes with a sense of place</p><h1>Bring the world<br><em>to your table.</em></h1><p class="intro-text">Cook your way through time-tested dishes, thoughtful techniques, and the stories that make every meal matter.</p><a class="cta-button" href="#cuisines">Start exploring <span aria-hidden="true">&#8594;</span></a></div><div class="hero-note"><span>24</span><small>recipes<br>to begin with</small></div></section>
+        <section id="cuisines" class="cuisine-types page-section"><div class="section-heading"><p class="eyebrow">Choose a direction</p><h2>Cook by cuisine</h2><p>Four traditions, one open kitchen.</p></div><div id="cuisine-grid" class="cuisine-grid" aria-live="polite"></div></section>
+        <section id="favorites" class="favorites-section page-section"><div class="section-heading"><p class="eyebrow">Your kitchen notebook</p><h2>Saved recipes</h2><p>Keep the dishes you want to make next close at hand.</p></div><div id="favorite-grid" class="dish-grid compact-grid"></div><p id="empty-favorites" class="empty-state">Your saved recipes will appear here.</p></section>
+        <section id="about" class="about page-section"><div class="about-copy"><p class="eyebrow">A shared table</p><h2>Good food travels well.</h2><p>Global Kitchen collects approachable recipes from across South and East Asia, pairing clear instructions with the cultural context behind each dish.</p><p>Save what catches your eye, learn at your own pace, and make room for a new favorite.</p></div><div class="about-stats"><strong>4</strong><span>cuisines</span><strong>24</strong><span>recipes</span><strong>∞</strong><span>ways to make them yours</span></div></section>
+        <section id="newsletter" class="newsletter page-section"><p class="eyebrow">A little inspiration</p><h2>New recipes, occasionally.</h2><form id="newsletter-form"><label class="sr-only" for="newsletter-email">Email address</label><input id="newsletter-email" type="email" placeholder="you@example.com" required><button type="submit">Subscribe</button></form><p id="newsletter-status" role="status"></p></section>
+    </main><footer><p>Global Kitchen <span aria-hidden="true">&middot;</span> Made for curious cooks.</p></footer><script src="script.js"></script>
 </body>
 </html>

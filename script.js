@@ -1,268 +1,156 @@
-// Wait for DOM content to load before running scripts
-document.addEventListener('DOMContentLoaded', () => {
-    // Handle page initialization
-    initPage();
-    
-    // Set up navigation and interactive elements
-    setupNavigation();
-    setupRecipeToggles();
-    setupSearch();
-    setupNewsletterForm();
-    
-    // Image handling for better UX
-    setupImageHandling();
+const DATA_URL = document.body.dataset.cuisine ? '../data/recipes.json' : 'data/recipes.json';
+const FAVORITES_KEY = 'global-kitchen-favorites';
+let recipeData;
+
+window.addEventListener('DOMContentLoaded', async () => {
+    try {
+        recipeData = await fetch(DATA_URL).then((response) => {
+            if (!response.ok) throw new Error(`Recipe data request failed: ${response.status}`);
+            return response.json();
+        });
+        updateFavoriteCount();
+        renderHome();
+        renderCuisinePage();
+        renderFavorites();
+        setupSearch();
+        setupNewsletterForm();
+    } catch (error) {
+        console.error(error);
+        const target = document.querySelector('#cuisine-grid, #dish-grid');
+        if (target) target.innerHTML = '<p class="empty-state">Recipes are temporarily unavailable. Please try again from a local web server.</p>';
+    }
 });
 
-// Initialize page based on current URL
-function initPage() {
-    // Determine if we're on the home page or a cuisine page
-    const isHomePage = !window.location.pathname.includes('/pages/');
-    
-    if (isHomePage) {
-        // Show home section by default on index.html
-        showSection('home');
-        
-        // Add click event for CTA button
-        const ctaButton = document.querySelector('.cta-button');
-        if (ctaButton) {
-            ctaButton.addEventListener('click', () => showSection('cuisines'));
-        }
-    }
+function allRecipes() {
+    return Object.entries(recipeData.cuisines).flatMap(([cuisineId, cuisine]) => cuisine.recipes.map((recipe) => ({ ...recipe, cuisineId, cuisineName: cuisine.name })));
 }
 
-// Setup navigation link functionality
-function setupNavigation() {
-    const navLinks = document.querySelectorAll('.nav-links .nav-link');
-    
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            // Only handle anchor links on home page
-            if (this.getAttribute('href').startsWith('#')) {
-                e.preventDefault();
-                
-                // Get the target section ID
-                const targetId = this.getAttribute('href').substring(1);
-                
-                // Show the target section
-                showSection(targetId);
-                
-                // Update active state
-                navLinks.forEach(link => link.classList.remove('active'));
-                this.classList.add('active');
-                
-                // Smooth scroll to section
-                document.getElementById(targetId).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
+function renderHome() {
+    const grid = document.getElementById('cuisine-grid');
+    if (!grid) return;
+    grid.innerHTML = Object.entries(recipeData.cuisines).map(([id, cuisine]) => `
+        <a class="cuisine-card" data-search="${escapeAttribute(`${cuisine.name} ${cuisine.description} ${cuisine.recipes.map((recipe) => recipe.name).join(' ')}`)}" href="Pages/${id}.html">
+            <img src="${imagePath(cuisine.image)}" alt="${escapeAttribute(cuisine.name)} cuisine" loading="lazy">
+            <div class="cuisine-card-copy"><span class="card-index">0${Object.keys(recipeData.cuisines).indexOf(id) + 1}</span><h3>${escapeHtml(cuisine.name)}</h3><p>${escapeHtml(cuisine.description)}</p><span class="card-link">${cuisine.recipes.length} recipes <span aria-hidden="true">&#8594;</span></span></div>
+        </a>`).join('');
 }
 
-// Show a specific section and hide others
-function showSection(sectionId) {
-    const sections = document.querySelectorAll('main section');
-    
-    sections.forEach(section => {
-        if (section.id === sectionId) {
-            section.style.display = sectionId === 'home' ? 'flex' : 'block';
-        } else {
-            section.style.display = 'none';
-        }
-    });
+function renderCuisinePage() {
+    const cuisineId = document.body.dataset.cuisine;
+    const grid = document.getElementById('dish-grid');
+    if (!cuisineId || !grid) return;
+    const cuisine = recipeData.cuisines[cuisineId];
+    if (!cuisine) return;
+    document.title = `${cuisine.name} Recipes | Global Kitchen`;
+    document.getElementById('cuisine-title').textContent = cuisine.title;
+    document.getElementById('cuisine-description').textContent = cuisine.description;
+    grid.innerHTML = cuisine.recipes.map((recipe) => recipeCard(recipe, cuisine.name)).join('');
+    setupRecipeButtons();
+    addRecipeSchema(cuisine.recipes, cuisine.name);
 }
 
-// Setup recipe toggles
-function setupRecipeToggles() {
-    const recipeButtons = document.querySelectorAll('.recipe-btn');
-    
-    recipeButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault(); // Prevent any default behavior
-            const recipeId = this.getAttribute('data-recipe-id');
-            if (recipeId) {
-                toggleRecipe(recipeId);
-            }
-        });
-    });
+function recipeCard(recipe, cuisineName) {
+    const favorite = getFavorites().includes(recipe.id);
+    const videoUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(recipe.videoQuery)}`;
+    return `<article class="dish-card" data-search="${escapeAttribute(`${recipe.name} ${recipe.ingredients.join(' ')} ${recipe.context} ${cuisineName}`)}">
+        <img src="${imagePath(recipe.image)}" alt="${escapeAttribute(recipe.name)}" loading="lazy">
+        <div class="dish-card-body"><div class="card-topline"><span>${escapeHtml(cuisineName)}</span><button class="favorite-btn ${favorite ? 'is-saved' : ''}" type="button" data-favorite-id="${recipe.id}" aria-label="${favorite ? 'Remove' : 'Save'} ${escapeAttribute(recipe.name)}" aria-pressed="${favorite}">${favorite ? '&#9733;' : '&#9734;'}</button></div>
+        <h2>${escapeHtml(recipe.name)}</h2><p class="ingredients"><strong>Ingredients:</strong> ${escapeHtml(recipe.ingredients.join(', '))}</p>
+        <div class="recipe-meta"><span>${escapeHtml(recipe.prepTime)} prep</span><span>${escapeHtml(recipe.cookTime)} cook</span><span>${escapeHtml(recipe.servings)} servings</span></div>
+        <div class="badges">${recipe.diet.map((tag) => `<span>${escapeHtml(tag)}</span>`).join('')}<span>${escapeHtml(recipe.difficulty)}</span><span>${escapeHtml(recipe.spice)} spice</span></div>
+        <button class="recipe-btn" type="button" data-recipe-id="${recipe.id}" aria-expanded="false" aria-controls="${recipe.id}-details">View recipe <span aria-hidden="true">&#8594;</span></button>
+        <div class="recipe-details" id="${recipe.id}-details" hidden><p class="context">${escapeHtml(recipe.context)}</p><h3>Preparation</h3><ol>${recipe.steps.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ol><div class="video-section"><h3>Video tutorial</h3><a class="video-link" href="${videoUrl}" target="_blank" rel="noopener noreferrer">Find a ${escapeAttribute(recipe.name)} tutorial on YouTube <span aria-hidden="true">&#8599;</span></a></div></div></div>
+    </article>`;
 }
 
-// Toggle recipe details visibility
-function toggleRecipe(id) {
-    try {
-        const recipe = document.getElementById(id);
-        if (!recipe) throw new Error(`Recipe element with ID ${id} not found`);
-        
-        const button = document.querySelector(`.recipe-btn[data-recipe-id="${id}"]`);
-        if (!button) throw new Error(`Button for recipe ID ${id} not found`);
-
-        // Toggle display with a smooth animation
-        if (recipe.style.display === 'none' || !recipe.style.display) {
-            recipe.style.display = 'block';
-            recipe.style.opacity = '0';
-            recipe.style.maxHeight = '0';
-            
-            // Apply transition
-            setTimeout(() => {
-                recipe.style.transition = 'opacity 0.3s ease, max-height 0.5s ease';
-                recipe.style.opacity = '1';
-                recipe.style.maxHeight = '500px';
-            }, 10);
-            
-            // Update button text
-            button.textContent = 'Hide Recipe';
-        } else {
-            recipe.style.opacity = '0';
-            recipe.style.maxHeight = '0';
-            
-            // Remove element after transition
-            setTimeout(() => {
-                recipe.style.display = 'none';
-            }, 300);
-            
-            // Update button text
-            button.textContent = 'View Recipe';
-        }
-    } catch (error) {
-        console.error('Error toggling recipe:', error.message);
-    }
+function setupRecipeButtons() {
+    document.querySelectorAll('.recipe-btn').forEach((button) => button.addEventListener('click', () => {
+        const details = document.getElementById(`${button.dataset.recipeId}-details`);
+        const open = !details.hidden;
+        details.hidden = open;
+        button.setAttribute('aria-expanded', String(!open));
+        button.innerHTML = open ? 'View recipe <span aria-hidden="true">&#8594;</span>' : 'Hide recipe <span aria-hidden="true">&#8593;</span>';
+    }));
+    document.querySelectorAll('.favorite-btn').forEach((button) => button.addEventListener('click', () => toggleFavorite(button.dataset.favoriteId)));
 }
 
-// Setup search functionality
 function setupSearch() {
-    const searchBar = document.getElementById('search-bar');
-    if (!searchBar) return;
-    
-    searchBar.addEventListener('input', debounce(function(e) {
-        const query = e.target.value.toLowerCase().trim();
-        
-        // Different search behavior based on page type
-        const isHomePage = !window.location.pathname.includes('/pages/');
-        
-        if (isHomePage) {
-            // On home page, search cuisine categories
-            searchCuisines(query);
-        } else {
-            // On cuisine pages, search dishes
-            searchDishes(query);
-        }
-    }, 300));
+    const input = document.getElementById('search-bar');
+    if (!input) return;
+    input.addEventListener('input', debounce(() => {
+        const query = input.value.trim().toLowerCase();
+        const cards = document.querySelectorAll('[data-search]');
+        let matches = 0;
+        cards.forEach((card) => {
+            const match = !query || card.dataset.search.toLowerCase().includes(query);
+            card.hidden = !match;
+            if (match) matches += 1;
+        });
+        const noResults = document.getElementById('no-results');
+        if (noResults) noResults.hidden = matches !== 0;
+    }, 180));
 }
 
-// Search cuisine categories on home page
-function searchCuisines(query) {
-    const cuisineCards = document.querySelectorAll('.cuisine-card');
-    let matchFound = false;
-    
-    cuisineCards.forEach(card => {
-        const name = card.querySelector('h3')?.textContent.toLowerCase() || '';
-        const description = card.querySelector('p')?.textContent.toLowerCase() || '';
-        
-        if (query === '' || name.includes(query) || description.includes(query)) {
-            card.style.display = 'flex';
-            matchFound = true;
-        } else {
-            card.style.display = 'none';
-        }
+function toggleFavorite(id) {
+    const favorites = getFavorites();
+    const next = favorites.includes(id) ? favorites.filter((favoriteId) => favoriteId !== id) : [...favorites, id];
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+    updateFavoriteCount();
+    document.querySelectorAll(`[data-favorite-id="${CSS.escape(id)}"]`).forEach((button) => {
+        const saved = next.includes(id);
+        button.classList.toggle('is-saved', saved);
+        button.setAttribute('aria-pressed', String(saved));
+        button.setAttribute('aria-label', `${saved ? 'Remove' : 'Save'} ${id}`);
+        button.innerHTML = saved ? '&#9733;' : '&#9734;';
     });
-    
-    displaySearchResults(matchFound, query);
+    renderFavorites();
 }
 
-// Search dishes on cuisine pages
-function searchDishes(query) {
-    const dishCards = document.querySelectorAll('.dish-card');
-    let matchFound = false;
-    
-    dishCards.forEach(card => {
-        const name = card.querySelector('h3')?.textContent.toLowerCase() || '';
-        const ingredients = card.querySelector('p')?.textContent.toLowerCase() || '';
-        
-        if (query === '' || name.includes(query) || ingredients.includes(query)) {
-            card.style.display = 'block';
-            matchFound = true;
-        } else {
-            card.style.display = 'none';
-        }
-    });
-    
-    displaySearchResults(matchFound, query);
+function renderFavorites() {
+    const grid = document.getElementById('favorite-grid');
+    if (!grid || !recipeData) return;
+    const favorites = getFavorites();
+    const recipes = allRecipes().filter((recipe) => favorites.includes(recipe.id));
+    grid.innerHTML = recipes.map((recipe) => recipeCard(recipe, recipe.cuisineName)).join('');
+    const empty = document.getElementById('empty-favorites');
+    if (empty) empty.hidden = recipes.length > 0;
+    if (grid.children.length) setupRecipeButtons();
 }
 
-// Display search results status
-function displaySearchResults(matchFound, query) {
-    // Only show message if query isn't empty
-    if (query) {
-        const resultsContainer = document.querySelector('.dish-grid, .cuisine-grid');
-        let noResultsMsg = document.getElementById('no-results');
-        
-        if (!matchFound) {
-            if (!noResultsMsg) {
-                noResultsMsg = document.createElement('p');
-                noResultsMsg.id = 'no-results';
-                noResultsMsg.style.textAlign = 'center';
-                noResultsMsg.style.gridColumn = '1 / -1';
-                noResultsMsg.style.padding = '20px';
-                resultsContainer.appendChild(noResultsMsg);
-            }
-            noResultsMsg.textContent = `No results found for "${query}".`;
-        } else if (noResultsMsg) {
-            noResultsMsg.remove();
-        }
-    }
+function addRecipeSchema(recipes, cuisineName) {
+    const schema = recipes.map((recipe) => ({ '@type': 'Recipe', name: recipe.name, description: recipe.context, recipeCuisine: cuisineName, recipeCategory: 'Main course', prepTime: isoDuration(recipe.prepTime), cookTime: isoDuration(recipe.cookTime), recipeYield: `${recipe.servings} servings`, recipeIngredient: recipe.ingredients, recipeInstructions: recipe.steps.map((text) => ({ '@type': 'HowToStep', text })), image: new URL(imagePath(recipe.image), window.location.href).href, video: { '@type': 'VideoObject', name: `${recipe.name} tutorial`, contentUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(recipe.videoQuery)}` } }));
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify({ '@context': 'https://schema.org', '@graph': schema });
+    document.head.appendChild(script);
 }
 
-// Setup newsletter form
+function isoDuration(value) {
+    const hours = value.match(/(\d+) hour/);
+    const minutes = value.match(/(\d+) min/);
+    return `PT${hours ? `${hours[1]}H` : ''}${minutes ? `${minutes[1]}M` : ''}` || 'PT0M';
+}
+
+function getFavorites() {
+    try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); } catch { return []; }
+}
+
+function updateFavoriteCount() {
+    const count = document.getElementById('favorite-count');
+    if (count) count.textContent = getFavorites().length;
+}
+
 function setupNewsletterForm() {
     const form = document.getElementById('newsletter-form');
     if (!form) return;
-    
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const email = this.querySelector('input[type="email"]').value;
-        
-        // Simulate form submission
-        const button = this.querySelector('button');
-        const originalText = button.textContent;
-        
-        button.disabled = true;
-        button.textContent = 'Submitting...';
-        
-        // Simulate API call
-        setTimeout(() => {
-            alert(`Thank you! ${email} has been subscribed to our newsletter.`);
-            this.reset();
-            button.disabled = false;
-            button.textContent = originalText;
-        }, 1000);
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        document.getElementById('newsletter-status').textContent = 'You are on the list. Watch your inbox for the next dish.';
+        form.reset();
     });
 }
 
-// Setup image handling for better user experience
-function setupImageHandling() {
-    const images = document.querySelectorAll('img');
-    
-    images.forEach(img => {
-        // Add loading attribute if not present
-        if (!img.hasAttribute('loading')) {
-            img.setAttribute('loading', 'lazy');
-        }
-        
-        // Handle image errors
-        img.onerror = () => {
-            console.error(`Failed to load image: ${img.src}`);
-            img.alt = 'Image not available';
-            img.src = img.src.includes('../') ? '../images/placeholder.jpg' : 'images/placeholder.jpg';
-            img.style.background = '#f0f0f0';
-        };
-    });
-}
-
-// Utility function for debouncing
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-}
+function imagePath(path) { return document.body.dataset.cuisine ? `../${path}` : path; }
+function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character])); }
+function escapeAttribute(value) { return escapeHtml(value); }
+function debounce(callback, delay) { let timer; return (...args) => { clearTimeout(timer); timer = setTimeout(() => callback(...args), delay); }; }
